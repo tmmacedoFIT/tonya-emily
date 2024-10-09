@@ -1,25 +1,71 @@
 ---
 title: "owner-analysis"
+author: "Tonya Macedo"
 format: html
 ---
 
-## Quarto
+## Exercise: Explore, Clean, and Wrangle Data
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+# Set Up
 
 ```{r}
-1 + 1
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(here)
 ```
 
-You can add options to executable code like this 
+# Read abundance data
 
 ```{r}
-#| echo: false
-2 * 2
+
+lobster_abundance <- read_csv(here::here("data/Lobster_Abundance_All_Years_20220829.csv"))
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Explore data
+
+```{r}
+colnames(lobster_abundance)
+
+head(lobster_abundance)
+
+summary(lobster_abundance)
+```
+
+# Change invalide size data to NA
+
+```{r}
+lobster_abundance <- lobster_abundance %>% 
+    mutate(SIZE_MM = na_if(SIZE_MM, -99999))
+```
+
+# Create dataframe with no data from site NAPL
+
+```{r}
+not_napl <- lobster_abundance %>% 
+    filter(SITE != "NAPL")
+```
+
+# Create dataframe for only lobsters at AQUE and larger than 70 mm
+
+```{r}
+aque_70mm <- lobster_abundance %>% 
+    filter(SITE == "AQUE" & SIZE_MM >= 70)
+
+```
+
+# View max size based on site and month
+
+```{r}
+#| warning: false
+
+max_lobster <- lobster_abundance %>% 
+  group_by(SITE, MONTH) %>% 
+  summarize(MAX_LENGTH = max(SIZE_MM, na.rm = TRUE))
+```
+
