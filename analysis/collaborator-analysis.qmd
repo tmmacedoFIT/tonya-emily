@@ -16,6 +16,8 @@ library(here)
 
 ### Read in data
 ```{r}
+#| message: false
+#| warning: false
 lobster_traps <- read_csv(here::here("data/Lobster_Trap_Counts_All_Years_20210519.csv"))
 ```
 
@@ -25,4 +27,90 @@ head(lobster_traps)
 summary(lobster_traps)
 
 ```
+
+### Convert missing to NA
+```{r}
+lobster_traps <- lobster_traps %>% 
+    mutate(TRAPS = na_if(TRAPS, -99999))
+summary(lobster_traps)
+```
+
+### Practice filter
+
+Subset not at NAPL
+```{r}
+not_napl <- lobster_traps %>% 
+  filter(SITE != "NAPL")
+```
+
+Subset at Carpenteria and number of traps is greater than 20
+```{r}
+carp_20_traps <- lobster_traps %>% 
+  filter(SITE == "CARP" & "TRAPS" > 20)
+```
+
+### Question 4: find maximum floats and group by site and month
+```{r}
+max_traps <- lobster_traps %>% 
+  group_by(SITE, MONTH) %>% 
+  summarize(max_traps_col = max(TRAPS, na.rm = TRUE))
+head(max_traps)
+```
+## Exercise: Data Visualization
+### Question 5
+```{r}
+ggplot(data = lobster_traps, aes(x = TRAPS)) +
+    geom_histogram() +
+    facet_wrap( ~ YEAR)
+```
+
+### Question 6
+
+Subset data for plot
+```{r}
+lobsters_traps_summarize <- lobster_traps %>% 
+  group_by(SITE, YEAR) %>% 
+  summarize(TOTAL_TRAPS = sum(TRAPS, na.rm = TRUE))
+```
+
+Create line graph
+```{r}
+# line plot
+ggplot(data = lobsters_traps_summarize, aes(x = YEAR, y = TOTAL_TRAPS)) +
+  geom_line(aes(color = SITE))
+
+# Make same graph with points as well
+ggplot(data = lobsters_traps_summarize, aes(x = YEAR, y = TOTAL_TRAPS)) +
+  geom_line(aes(color = SITE)) +
+  geom_point(aes(color = SITE))
+```
+### Question 7
+
+Create new dataset 
+```{r}
+lobster_traps_fishing_pressure <- lobster_traps %>% 
+  filter(YEAR %in% c("2019", "2020", "2021")) %>% 
+  mutate(FISHING_PRESSURE = if_else(TRAPS >=8, "high", "low")) %>% 
+  group_by(SITE, FISHING_PRESSURE) %>% 
+  summarize(COUNT = n()) %>% 
+  drop_na()
+```
+
+Create bar plot
+```{r}
+ggplot(data = lobster_traps_fishing_pressure, aes(x = SITE, y = COUNT, fill = FISHING_PRESSURE)) + 
+  geom_col()
+
+# Try using dodge 
+# dodged bar plot
+ggplot(data = lobster_traps_fishing_pressure, aes(x = SITE, y = COUNT, fill = FISHING_PRESSURE)) +
+    geom_col(position = "dodge")
+
+
+```
+
+
+
+
+
 
