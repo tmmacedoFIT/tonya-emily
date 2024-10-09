@@ -56,6 +56,61 @@ max_traps <- lobster_traps %>%
   summarize(max_traps_col = max(TRAPS, na.rm = TRUE))
 head(max_traps)
 ```
+## Exercise: Data Visualization
+### Question 5
+```{r}
+ggplot(data = lobster_traps, aes(x = TRAPS)) +
+    geom_histogram() +
+    facet_wrap( ~ YEAR)
+```
+
+### Question 6
+
+Subset data for plot
+```{r}
+lobsters_traps_summarize <- lobster_traps %>% 
+  group_by(SITE, YEAR) %>% 
+  summarize(TOTAL_TRAPS = sum(TRAPS, na.rm = TRUE))
+```
+
+Create line graph
+```{r}
+# line plot
+ggplot(data = lobsters_traps_summarize, aes(x = YEAR, y = TOTAL_TRAPS)) +
+  geom_line(aes(color = SITE))
+
+# Make same graph with points as well
+ggplot(data = lobsters_traps_summarize, aes(x = YEAR, y = TOTAL_TRAPS)) +
+  geom_line(aes(color = SITE)) +
+  geom_point(aes(color = SITE))
+```
+### Question 7
+
+Create new dataset 
+```{r}
+lobster_traps_fishing_pressure <- lobster_traps %>% 
+  filter(YEAR %in% c("2019", "2020", "2021")) %>% 
+  mutate(FISHING_PRESSURE = if_else(TRAPS >=8, "high", "low")) %>% 
+  group_by(SITE, FISHING_PRESSURE) %>% 
+  summarize(COUNT = n()) %>% 
+  drop_na()
+```
+
+Create bar plot
+```{r}
+ggplot(data = lobster_traps_fishing_pressure, aes(x = SITE, y = COUNT, fill = FISHING_PRESSURE)) + 
+  geom_col()
+
+# Try using dodge 
+# dodged bar plot
+ggplot(data = lobster_traps_fishing_pressure, aes(x = SITE, y = COUNT, fill = FISHING_PRESSURE)) +
+    geom_col(position = "dodge")
+
+
+```
+
+
+
 
 
 
