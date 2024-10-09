@@ -16,6 +16,8 @@ library(here)
 
 ### Read in data
 ```{r}
+#| message: false
+#| warning: false
 lobster_traps <- read_csv(here::here("data/Lobster_Trap_Counts_All_Years_20210519.csv"))
 ```
 
@@ -25,4 +27,35 @@ head(lobster_traps)
 summary(lobster_traps)
 
 ```
+
+### Convert missing to NA
+```{r}
+lobster_traps <- lobster_traps %>% 
+    mutate(TRAPS = na_if(TRAPS, -99999))
+summary(lobster_traps)
+```
+
+### Practice filter
+
+Subset not at NAPL
+```{r}
+not_napl <- lobster_traps %>% 
+  filter(SITE != "NAPL")
+```
+
+Subset at Carpenteria and number of traps is greater than 20
+```{r}
+carp_20_traps <- lobster_traps %>% 
+  filter(SITE == "CARP" & "TRAPS" > 20)
+```
+
+### Question 4: find maximum floats and group by site and month
+```{r}
+max_traps <- lobster_traps %>% 
+  group_by(SITE, MONTH) %>% 
+  summarize(max_traps_col = max(TRAPS, na.rm = TRUE))
+head(max_traps)
+```
+
+
 
