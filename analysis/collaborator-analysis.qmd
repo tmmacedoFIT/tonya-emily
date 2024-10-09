@@ -1,25 +1,28 @@
 ---
 title: "collaborator-analysis"
 format: html
+author: "Emily Wapman"
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+### Load libraries
 
 ```{r}
-1 + 1
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(here)
 ```
 
-You can add options to executable code like this 
-
+### Read in data
 ```{r}
-#| echo: false
-2 * 2
+lobster_traps <- read_csv(here::here("data/Lobster_Trap_Counts_All_Years_20210519.csv"))
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+### Explore data
+```{r}
+head(lobster_traps)
+summary(lobster_traps)
+
+```
+
