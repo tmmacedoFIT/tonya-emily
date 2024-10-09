@@ -4,9 +4,9 @@ author: "Tonya Macedo"
 format: html
 ---
 
-## Exercise: Explore, Clean, and Wrangle Data
+# Exercise: Explore, Clean, and Wrangle Data
 
-# Set Up
+## Set Up
 
 ```{r}
 #| message: false
@@ -19,7 +19,7 @@ library(tidyr)
 library(here)
 ```
 
-# Read abundance data
+## Read abundance data
 
 ```{r}
 
@@ -37,21 +37,21 @@ head(lobster_abundance)
 summary(lobster_abundance)
 ```
 
-# Change invalide size data to NA
+## Change invalide size data to NA
 
 ```{r}
 lobster_abundance <- lobster_abundance %>% 
     mutate(SIZE_MM = na_if(SIZE_MM, -99999))
 ```
 
-# Create dataframe with no data from site NAPL
+## Create dataframe with no data from site NAPL
 
 ```{r}
 not_napl <- lobster_abundance %>% 
     filter(SITE != "NAPL")
 ```
 
-# Create dataframe for only lobsters at AQUE and larger than 70 mm
+## Create dataframe for only lobsters at AQUE and larger than 70 mm
 
 ```{r}
 aque_70mm <- lobster_abundance %>% 
@@ -59,7 +59,7 @@ aque_70mm <- lobster_abundance %>%
 
 ```
 
-# View max size based on site and month
+## View max size based on site and month
 
 ```{r}
 #| warning: false
@@ -67,5 +67,85 @@ aque_70mm <- lobster_abundance %>%
 max_lobster <- lobster_abundance %>% 
   group_by(SITE, MONTH) %>% 
   summarize(MAX_LENGTH = max(SIZE_MM, na.rm = TRUE))
+```
+# Exercise: Data Visualization
+
+## View lobster count per size by site
+
+```{r}
+```
+
+
+```{r}
+ggplot(data = lobster_abundance, 
+       aes(x = SIZE_MM)) +
+    geom_histogram() +
+    facet_wrap(~SITE)
+```
+
+
+```{r}
+```
+## View lobster abundance per year by site
+
+```{r}
+lobsters_summarize <- lobster_abundance %>% 
+  group_by(SITE, YEAR) %>% 
+  summarize(COUNT = n())
+
+# line plot
+ggplot(data = lobsters_summarize, aes(x = YEAR, y = COUNT)) +
+  geom_line(aes(color = SITE)) 
+
+# line and point plot
+ggplot(data = lobsters_summarize, aes(x = YEAR, y = COUNT)) +
+  geom_point(aes(color = SITE)) +
+  geom_line(aes(color = SITE)) 
+```
+## View small and large lobsters per site from 2019-2021
+
+```{r}
+lobster_size_lrg <- lobster_abundance %>%
+    filter(YEAR %in% c(2019, 2020, 2021)) %>%
+    mutate(SIZE_BIN = if_else(SIZE_MM <= 70, true = "small", false = "large")) %>%
+    group_by(SITE, SIZE_BIN) %>%
+    summarize(COUNT = n()) %>%
+    drop_na()
+
+# bar plot
+ggplot(data = lobster_size_lrg, aes(x = SITE, y = COUNT, fill = SIZE_BIN)) +
+    geom_col()
+
+# dodged bar plot
+ggplot(data = lobster_size_lrg, aes(x = SITE, y = COUNT, fill = SIZE_BIN)) +
+    geom_col(position = "dodge")
+```
+## Question 8 - Make pretty plots
+
+### Count of size per site
+
+```{r}
+size_per_site <- ggplot(lobster_abundance, aes(x = SIZE_MM, y = COUNT, fill = SITE)) +
+  geom_histogram(binwidth = 5, color = "black", alpha = 0.7) + 
+  facet_wrap(~ SITE) +  # Create a separate plot for each site
+  labs(title = "Lobster Size Distribution by Site",
+       x = "Lobster Size (mm)",
+       y = "Lobster Count") +
+   scale_x_continuous(limits = c(0, 220)) +
+  theme_light() +
+  theme(legend.position = "none") 
+
+size_per_site
+```
+### Count of lobster per site per year
+```{r}
+# line and point plot
+ggplot(data = lobsters_summarize, aes(x = YEAR, y = COUNT)) +
+  geom_point(aes(color = SITE)) +
+  geom_line(aes(color = SITE)) +
+  labs(title = "Annual Lobster Count by Site",
+       x = "Year",
+       y = "Lobster Count") +
+   scale_x_continuous(breaks = seq(min(lobster_abundance$YEAR), max(lobster_abundance$YEAR), by = 1))
 ```
 
