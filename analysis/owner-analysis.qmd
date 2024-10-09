@@ -1,5 +1,5 @@
 ---
-title: "owner-analysis.qmd"
+title: "owner-analysis"
 format: html
 ---
 
